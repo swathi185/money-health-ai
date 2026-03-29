@@ -1,198 +1,182 @@
 import streamlit as st
 
-# ---------------- PAGE CONFIG ----------------
-st.set_page_config(
-    page_title="Money Health AI",
-    layout="centered"
-)
+st.set_page_config(page_title="AI Money Health Score", layout="centered")
 
-# ---------------- HEADER ----------------
-st.title("💰 Money Health Score – India")
-st.caption("An AI-powered personal finance mentor for everyday Indians")
-st.info("⌨️ Tip: Use TAB to move between fields")
+st.title("💰 AI Money Health Score")
+st.write("A 5-minute financial checkup for middle-class Indians")
 
 st.divider()
 
-# ---------------- FORM ----------------
-with st.form("money_form"):
+# -------------------------
+# USER INPUTS
+# -------------------------
 
-    st.subheader("👤 User Information")
-    col1, col2, col3 = st.columns(3)
+st.header("👤 Basic Details")
 
-    with col1:
-        age = st.text_input("Age")
+age = st.number_input("Your Age", min_value=18, max_value=70, value=25)
 
-    with col2:
-        income = st.text_input("Monthly Income (₹)")
+monthly_income = st.number_input(
+    "Monthly Income (₹)",
+    min_value=0,
+    placeholder="Enter your monthly income"
+)
 
-    with col3:
-        expenses = st.text_input("Monthly Expenses (₹)")
+monthly_expenses = st.number_input(
+    "Monthly Expenses (₹)",
+    min_value=0,
+    placeholder="Enter your monthly expenses"
+)
 
-    st.subheader("💼 Financial Status")
-    col4, col5 = st.columns(2)
+st.divider()
 
-    with col4:
-        savings = st.text_input("Savings (₹)")
+st.header("🏦 Financial Information")
 
-    with col5:
-        loans = st.text_input("Loans (₹)")
+emergency_savings = st.number_input(
+    "Emergency Savings Available (₹)",
+    min_value=0,
+    placeholder="Savings you can use in emergency"
+)
 
-    st.subheader("🎯 Goals & Life Events")
-    col6, col7 = st.columns(2)
+has_health_insurance = st.selectbox(
+    "Do you have Health Insurance?",
+    ["No", "Yes"]
+)
 
-    with col6:
-        life_event = st.selectbox(
-            "Upcoming Life Event",
-            ["None", "Bonus", "Marriage", "New Baby"]
-        )
+has_term_insurance = st.selectbox(
+    "Do you have Term Life Insurance?",
+    ["No", "Yes"]
+)
 
-    with col7:
-        retirement_age = st.number_input(
-            "Target Retirement Age",
-            min_value=40,
-            max_value=65,
-            value=60
-        )
+monthly_sip = st.number_input(
+    "Monthly Investment / SIP (₹)",
+    min_value=0,
+    placeholder="Amount you invest monthly"
+)
 
-    submitted = st.form_submit_button("📊 Check My Money Health")
+monthly_emi = st.number_input(
+    "Total Monthly EMI (₹)",
+    min_value=0,
+    placeholder="Loan EMI if any"
+)
 
-# ---------------- LOGIC ----------------
-if submitted:
-    try:
-        age = int(age)
-        income = float(income)
-        expenses = float(expenses)
-        savings = float(savings)
-        loans = float(loans)
+uses_tax_saving = st.selectbox(
+    "Do you invest in tax-saving options (80C / NPS)?",
+    ["No", "Yes"]
+)
 
-        # -------- SCORE --------
-        score = 100
+started_retirement = st.selectbox(
+    "Have you started investing for retirement?",
+    ["No", "Yes"]
+)
 
-        if expenses > income:
-            score -= 30
-        if savings < income * 0.2:
-            score -= 20
-        if savings < expenses * 3:
-            score -= 25
-        if loans > income * 0.4:
-            score -= 25
+st.divider()
 
-        score = max(score, 0)
+# -------------------------
+# SCORING LOGIC
+# -------------------------
 
-        # -------- RESULT --------
-        st.divider()
-        st.subheader("📈 Your Money Health Result")
-        st.metric("Money Health Score", f"{score} / 100")
+score = 0
+details = []
 
-        if score >= 70:
-            st.success("You are financially healthy 👍")
-        elif score >= 40:
-            st.warning("Your financial health is average ⚠️")
-        else:
-            st.error("Your financial health needs urgent attention ❌")
+# 1. Emergency Preparedness (15)
+if monthly_expenses > 0 and emergency_savings >= monthly_expenses * 3:
+    score += 15
+    details.append("✅ Emergency fund is adequate")
+else:
+    details.append("❌ Emergency fund is insufficient")
 
-        # -------- AI INSIGHTS --------
-        st.subheader("🧠 AI Insights")
+# 2. Insurance Coverage (15)
+if has_health_insurance == "Yes" and has_term_insurance == "Yes":
+    score += 15
+    details.append("✅ Insurance coverage is good")
+else:
+    details.append("❌ Insurance coverage needs improvement")
 
-        issues = []
+# 3. Investment Discipline (20)
+if monthly_income > 0 and monthly_sip >= monthly_income * 0.2:
+    score += 20
+    details.append("✅ Strong investment habit")
+elif monthly_sip > 0:
+    score += 10
+    details.append("⚠️ Moderate investment habit")
+else:
+    details.append("❌ No regular investments")
 
-        if expenses > income:
-            issues.append("High expenses compared to income")
-        if savings < income * 0.2:
-            issues.append("Low savings rate")
-        if savings < expenses * 3:
-            issues.append("No emergency fund")
-        if loans > income * 0.4:
-            issues.append("High loan burden")
+# 4. Debt Health (15)
+if monthly_income > 0 and monthly_emi <= monthly_income * 0.3:
+    score += 15
+    details.append("✅ Debt level is healthy")
+else:
+    details.append("❌ Debt burden is high")
 
-        if not issues:
-            st.info("No major issues detected. Keep maintaining your habits.")
-        else:
-            for issue in issues:
-                st.warning(issue)
+# 5. Tax Awareness (15)
+if uses_tax_saving == "Yes":
+    score += 15
+    details.append("✅ Using tax-saving instruments")
+else:
+    details.append("❌ Not using tax benefits effectively")
 
-        # -------- HOW TO DO IT (MOST IMPORTANT) --------
-        st.subheader("🛠️ How to Improve – Action Plan")
+# 6. Retirement Readiness (20)
+if started_retirement == "Yes":
+    score += 20
+    details.append("✅ Retirement planning started")
+else:
+    details.append("❌ Retirement planning not started")
 
-        steps = []
+# -------------------------
+# RESULTS
+# -------------------------
 
-        if expenses > income:
-            steps.append(
-                "📌 Track expenses for 30 days and cut at least 10–20% from non-essential spending (food delivery, subscriptions, impulse buys)."
-            )
+st.header("📊 Your Money Health Result")
 
-        if savings < income * 0.2:
-            steps.append(
-                "📌 Follow the 50-30-20 rule: 50% needs, 30% wants, 20% savings. Start by auto-transferring savings on salary day."
-            )
+st.metric("Money Health Score", f"{score} / 100")
 
-        if savings < expenses * 3:
-            steps.append(
-                "📌 Build an emergency fund equal to 3 months of expenses by saving a fixed amount every month in a liquid fund or savings account."
-            )
+if score >= 80:
+    st.success("🌟 Excellent financial health")
+elif score >= 60:
+    st.info("🙂 Good, but can be improved")
+elif score >= 40:
+    st.warning("⚠️ Needs attention")
+else:
+    st.error("🚨 Financial health is weak")
 
-        if loans > income * 0.4:
-            steps.append(
-                "📌 Prioritize closing high-interest loans first (credit cards, personal loans) before starting new investments."
-            )
+st.divider()
 
-        if not steps:
-            steps.append(
-                "📌 Continue investing regularly and review your finances every 6 months."
-            )
+st.subheader("🔍 Detailed Analysis")
+for d in details:
+    st.write(d)
 
-        for step in steps:
-            st.write(step)
+st.divider()
 
-        # -------- LIFE EVENT ADVISOR --------
-        if life_event != "None":
-            st.subheader("🎉 Life Event Guidance")
+# -------------------------
+# ACTIONABLE SUGGESTIONS
+# -------------------------
 
-            if life_event == "Bonus":
-                st.info(
-                    "How to use bonus: "
-                    "50% invest (mutual funds / PPF), "
-                    "30% save for goals, "
-                    "20% spend guilt-free."
-                )
+st.subheader("🛠️ Personalized Suggestions")
 
-            elif life_event == "Marriage":
-                st.info(
-                    "How to prepare for marriage: "
-                    "Create joint budget, increase emergency fund, "
-                    "review health & life insurance."
-                )
+if emergency_savings < monthly_expenses * 3:
+    st.write("• Build an emergency fund of at least **3 months of expenses**")
 
-            elif life_event == "New Baby":
-                st.info(
-                    "How to prepare for a baby: "
-                    "Upgrade health insurance, "
-                    "start education savings, "
-                    "increase emergency fund."
-                )
+if has_health_insurance == "No":
+    st.write("• Buy **health insurance** to protect against medical costs")
 
-        # -------- FIRE READINESS --------
-        st.subheader("🔥 FIRE (Early Retirement) Guidance")
+if has_term_insurance == "No":
+    st.write("• Consider **term life insurance** for family protection")
 
-        if retirement_age < 50:
-            st.warning(
-                "How to achieve early retirement: "
-                "Save aggressively (30–40% income), "
-                "focus on equity investments, "
-                "avoid lifestyle inflation."
-            )
-        elif retirement_age <= 60:
-            st.success(
-                "How to stay on track: "
-                "Invest consistently, "
-                "review asset allocation yearly, "
-                "increase savings with income growth."
-            )
-        else:
-            st.info(
-                "How to plan comfortably: "
-                "Maintain steady investments and control risk."
-            )
+if monthly_income > 0 and monthly_sip < monthly_income * 0.2:
+    st.write("• Try investing at least **20% of income** regularly")
 
-    except ValueError:
-        st.error("⚠️ Please enter valid numeric values in all input fields")
+if monthly_emi > monthly_income * 0.3 and monthly_income > 0:
+    st.write("• Reduce loan burden; keep EMI below **30% of income**")
+
+if uses_tax_saving == "No":
+    st.write("• Use **80C / NPS** to save tax and invest smartly")
+
+if started_retirement == "No":
+    st.write("• Start retirement investing early for long-term security")
+
+st.divider()
+
+st.caption(
+    "⚠️ This is an educational advisory tool, not financial or legal advice."
+)
