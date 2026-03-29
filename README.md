@@ -18,19 +18,20 @@ AI Money Health Score converts basic financial inputs into a clear financial hea
 This tool acts as a foundation layer for advanced features like FIRE planning, tax optimization, and portfolio analysis.
 
 🧠 Features
-✅ Money Health Score (0–100)
+Money Health Score (0–100)
 
 Calculated using explainable, rule-based logic.
 
-✅ 6 Financial Dimensions
+SIX Financial Dimensions
 Emergency Preparedness
 Insurance Coverage
 Investment Discipline
 Debt Health
 Tax Awareness
 Retirement Readiness
+
 ✅ Instant, Dynamic Results
-No submit button
+
 Score updates automatically when inputs change
 ✅ Personalized Action Plan
 
@@ -50,18 +51,17 @@ Money Health Score (0–100)
 Financial health category (Excellent / Good / Needs Attention)
 Detailed diagnosis per dimension
 Actionable suggestions to improve financial health
+
 🛠️ Tech Stack
 Python
 Streamlit
+
 Rule-based explainable AI logic
 ▶️ How to Run Locally
 pip install streamlit
 streamlit run app.py
-🎯 Why This Works for Hackathons
-Simple, clear, and demo-friendly
-No black-box AI — all calculations are transparent
-Focused on real Indian middle-class problems
-Easily extensible to FIRE planning, tax optimization, and MF portfolio analysis
+
+
 🔮 Future Scope
 FIRE (Early Retirement) Planner
 Tax Regime Optimization (Old vs New)
